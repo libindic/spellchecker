@@ -152,7 +152,7 @@ class Spellchecker:
         if self.lang != language:
             self.NWORDS = None
         if language == None :
-            self.lang = detect_lang(word)[word]
+            self.lang = _detect_lang(word)[word]
         else :
             self.lang = language
         if word=="": return True

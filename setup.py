@@ -6,7 +6,7 @@ name = "spellchecker"
 
 setup(
     name = name,
-    version = "0.2",
+    version = "0.2.1",
     url = "http://silpa.org.in/Spellchecker",
     license = "LGPL-3.0",
     description = "Indian Language Spellchecker Library",
