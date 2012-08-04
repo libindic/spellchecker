@@ -21,9 +21,13 @@
 import os
 import string
 import codecs
-from inexactsearch import inexactsearch
-from indexer import DictionaryIndex
+import inexactsearch
 import urllib
+
+from indexer import DictionaryIndex
+from langdetect import _detect_lang
+
+__all__ = ['Spellchecker','getInstance']
 
 class Spellchecker:
     
@@ -100,7 +104,7 @@ class Spellchecker:
         if self.lang != language:
             self.NWORDS = None
         if language==None :
-            self.lang = detect_lang(word)[word]
+            self.lang = _detect_lang(word)[word]
         else :
             self.lang = language
         if self.NWORDS == None:
