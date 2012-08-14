@@ -63,7 +63,7 @@ class DictionaryIndex:
             # by the byte length of currently read word till you get
             # new alphaet which is not indexed
 
-            if len(item) > 0 and not self.dictionary.has_key(item[0]):
+            if len(item) > 0 and not item[0] in self.dictionary.has_key:
                 self.dictionary[item[0]] = self.offset
             self.offset = self.offset + len(item.encode("utf-8"))
 
