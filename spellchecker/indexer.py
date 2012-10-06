@@ -63,7 +63,7 @@ class DictionaryIndex:
             # by the byte length of currently read word till you get
             # new alphaet which is not indexed
 
-            if len(item) > 0 and not item[0] in self.dictionary.has_key:
+            if len(item) > 0 and not item[0] in self.dictionary.keys():
                 self.dictionary[item[0]] = self.offset
             self.offset = self.offset + len(item.encode("utf-8"))
 
@@ -71,7 +71,7 @@ class DictionaryIndex:
 
         for index in self.dictionary:
             value = self.dictionary.get(index, None)
-            if not value == None:
+            if not value:
                 self.op.write(index + "=%d\n" % value)
 
         # Clean up
@@ -88,10 +88,10 @@ class DictionaryIndex:
             returns - dictionary object containing indexing information
         """
 
-        self.index_file = os.path.join(self.path, \
+        self.index_file = os.path.join(self.path,
                 dictfile.split(".")[0] + ".index")
         try:
-            self.fp = codecs.open(self.index_file, "r", \
+            self.fp = codecs.open(self.index_file, "r",
                     encoding="utf-8", errors="ignore")
         except IOError:
             self.create_index(dictfile)
