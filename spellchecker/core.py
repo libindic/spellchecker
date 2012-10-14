@@ -50,7 +50,7 @@ class Spellchecker:
         return set(words)
 
     def train(self, features=None):
-        if not self.lang in self.dictionaries.has_key:
+        if not self.lang in self.dictionaries.keys():
             index = DictionaryIndex()
             self.dictionaries[self.lang] = index.load_index(self.lang + ".dic")
 
