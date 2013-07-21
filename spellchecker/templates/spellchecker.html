@@ -17,13 +17,14 @@ function getSuggestions(word)
         beforeSend:function(){
             id_result.hide();
             id_error.hide();
+            $('#list').empty();
             id_progress.html("Fetching suggestions. Please wait...");
         },
         success: function(msg) {
             var resultobj=eval(msg.result);
             id_progress.hide();
             id_result.html("Wrong Spelling. Suggestions:").show();
-            var id_list = $('#list')
+            var id_list = $('#list');
             if(resultobj.length != 0)
             {
                 $.each(resultobj,function(index, item)
