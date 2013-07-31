@@ -17,7 +17,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-
 import os
 import string
 import codecs
@@ -33,8 +32,6 @@ __all__ = ['Spellchecker', 'getInstance']
 class Spellchecker:
 
     def __init__(self):
-        self.template = os.path.join(os.path.dirname(__file__), \
-                'spellchecker.html')
         self.NWORDS = None
         self.lang = None
         self.dictionaries = {}
@@ -50,13 +47,13 @@ class Spellchecker:
         return set(words)
 
     def train(self, features=None):
-        if not self.lang in self.dictionaries.keys():
+        if not self.lang in self.dictionaries:
             index = DictionaryIndex()
             self.dictionaries[self.lang] = index.load_index(self.lang + ".dic")
 
     def get_wordlist(self, word=""):
         index = self.dictionaries.get(self.lang, None)
-        if index == None:
+        if index is None:
             self.train()
             index = self.dictionaries.get(self.lang, None)
 
@@ -65,11 +62,11 @@ class Spellchecker:
             return words
 
         byte_offset = index.get(word[0], None)
-        if byte_offset == None:
+        if byte_offset is None:
             return words
 
-        path = os.path.join(os.path.dirname(__file__), "dicts/" + self.lang \
-                + ".dic")
+        path = os.path.join(os.path.dirname(__file__), "dicts/" +
+                            self.lang + ".dic")
         fp = codecs.open(path, "r", encoding="utf-8", errors="ignore")
         fp.seek(int(byte_offset))
 
@@ -106,11 +103,11 @@ class Spellchecker:
             return None
         if self.lang != language:
             self.NWORDS = None
-        if language == None:
+        if language is None:
             self.lang = _detect_lang(word)[word]
         else:
             self.lang = language
-        if self.NWORDS == None:
+        if self.NWORDS is None:
             self.NWORDS = self.get_wordlist(word)
         if word in self.NWORDS:
             return word
@@ -162,22 +159,22 @@ class Spellchecker:
             return True
         if self.lang != language:
             self.NWORDS = None
-        if language == None:
+        if language is None:
             self.lang = _detect_lang(word)[word]
         else:
             self.lang = language
         if word == "":
             return True
 
-        if self.NWORDS == None:
+        if self.NWORDS is None:
             self.NWORDS = self.get_wordlist(word)
-        if self.NWORDS == None:
+        if self.NWORDS is None:
             # Dictionary not found
             return False
         result = word in self.NWORDS
         #if it is english word, try converting the first letter to lower case.
         #This will happen if the word is first word of a sentence
-        if result == False and word.upper() != word.lower():
+        if result is False and word.upper() != word.lower():
             newword = word[0].lower() + word[1:]
             self.NWORDS = self.get_wordlist(newword)
             return newword in self.NWORDS
