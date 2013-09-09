@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/env python
 
 from setuptools import setup, find_packages
@@ -19,5 +20,6 @@ of indian languages. This library is far from perfect",
     include_package_data = True,
     setup_requires = ['setuptools-git'],
     install_requires = ['setuptools', 'inexactsearch'],
+    test_suite='tests',
     zip_safe = False,
     )
