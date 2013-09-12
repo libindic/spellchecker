@@ -30,6 +30,9 @@ __all__ = ['Spellchecker', 'getInstance']
 
 
 class Spellchecker:
+    """
+    Spellchecker Class. contains spell checking and suggestion methods.
+    """
 
     def __init__(self):
         self.NWORDS = None
@@ -37,10 +40,6 @@ class Spellchecker:
         self.dictionaries = {}
 
     def words(self, text):
-        '''
-        no need to check for punctuation,
-        since we are loading a proof read wordlist
-        '''
         #for punct in string.punctuation:
         #    text = text.replace(punct,"")
         words = text.split()
@@ -78,9 +77,6 @@ class Spellchecker:
         return words
 
     def levenshtein(self, s1, s2):
-        """
-        Return the levenshtein distance between two string
-        """
         if len(s1) < len(s2):
             return self.levenshtein(s2, s1)
         if not s1:
@@ -98,6 +94,19 @@ class Spellchecker:
         return previous_row[-1]
 
     def suggest(self, word, language=None, distance=2):
+        """
+        Gives a list of words similar to the given word
+
+        :param word: The word for which  spelling suggestions are required.
+        :type word: str.
+        :param distance: suggestion will contain words with length =word length +/-  distance
+        :type distance: int
+        :returns: A list of suggested spellings.
+
+         >>> a.suggest(u"cate")
+         [u'cat', u'cater', u'caters', u'cats']
+
+        """
         word = word.strip()
         if word == "":
             return None
@@ -151,6 +160,18 @@ class Spellchecker:
         return filtered_candidates
 
     def check(self, word, language=None):
+        """
+        Checks whether given word has correct spelling.
+
+        :param word: The word whose spelling tis to be checked.
+        :type word: str.
+        :param language: *optional* language code for the word.
+        :type languge: str.
+        :returns: Boolean True or False
+
+         >>> a.check(u"അംഗദന്‍")
+         True
+        """
         word = word.strip()
         if word == "":
             return None
@@ -182,16 +203,19 @@ class Spellchecker:
             return result
 
     def strip_punctuations(self, s):
-        """
-        Remove all the punctuation characters from the string and
-        return the resulting string
-        """
         exclude = set(string.punctuation)
         return ''.join(ch for ch in s if ch not in exclude)
 
     def check_batch(self, text, language=None):
         """
         Return a list of misspelled words give a chunk of text.
+
+        :param text: Input text.
+        :type text: str
+        :returns: list of mispelled words.
+
+         >>> a.check_batch(u"thire is only one anser")
+         [u'thire', u'anser']
         """
         words = urllib.unquote(text)
         words = words.split()
@@ -203,9 +227,15 @@ class Spellchecker:
         return misspelled_words
 
     def get_module_name(self):
+        """
+        Returns module name.
+        """
         return "Spellchecker"
 
     def get_info(self):
+        """
+        Returns module info
+        """
         return "Indic Spellchecker"
 
 
