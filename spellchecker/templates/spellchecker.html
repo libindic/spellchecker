@@ -89,24 +89,31 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block content %}
-<div class="well">
-    <h2>Spellchecker</h2>
-    </hr>
-    <p>This is a demo of spellcheck service of silpa. In this page, you can enter a word for checking the spelling and just get the result.</p>
-    <p>For using Silpa spellcheck service in your web or desktop applications, read the <a href="apis.html#spellcheck">API documentation</a>. This page itself is an example for using silpa spellcheck APIs in a webpage.</p>
-    <form  action="" method="post">
-        <label>Word : </label>
-        <input type="text" name="word" />
-        <span class="help-block">Type in the word to check spelling</span>
-        <input type="submit" class="btn" value="Check Spelling"/>
-    </form>
-    <div id="progress" class="alert alert-info hide"></div>
-    <div id="errormessage" class="alert alert-error hide"></div>
-    <div id="result">
-    </div>
-    <ul id='list'>
-    </ul>
+<div class="page-header">
+    <h1>Spellchecker</h1>
 </div>
+<p>This is a demo of spellcheck service of silpa. In this page, you can enter a word for checking the spelling and just get the result.</p>
+<p>For using Silpa spellcheck service in your web or desktop applications, read the <a href="apis.html#spellcheck">API documentation</a>. This page itself is an example for using silpa spellcheck APIs in a webpage.</p>
+
+<form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label for="word" class="col-sm-2 control-label">Word</label>
+        <div class="col-sm-4">
+            <input type="text" name="word" id="word" class="form-control"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default">Check Spelling</button>
+        </div>
+    </div>
+</form>
+
+<div id="progress" class="alert alert-info silpa-hide"></div>
+<div id="errormessage" class="alert alert-danger silpa-hide"></div>
+<div id="result"></div>
+<ul id='list'></ul>
 <hr/>
 <div class="well">
     <h3>Python Spell Check and Spell Suggest  API</h3>
