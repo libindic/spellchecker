@@ -1,2 +1,4 @@
 marisa_trie
 rreplace
+soundex
+python-Levenshtein
