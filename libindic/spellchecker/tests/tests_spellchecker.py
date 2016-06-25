@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from testtools import TestCase
+import collections
+
 from libindic import spellchecker
+from testtools import TestCase
 
 
 class MalayalamSpellcheckerTest(TestCase):
@@ -35,3 +37,17 @@ class MalayalamSpellcheckerTest(TestCase):
             if self.verbosity:
                 print("%s  :  %s" % (word, status))
             assert not status
+
+    def test_suggestion_generation(self):
+        '''
+        Test if correct word is in the list of suggestions generated.
+        '''
+        words = collections.OrderedDict({u'ബാരതം': u'ഭാരതം',
+                                         })
+        for incorrect_word, correct_word in words.items():
+            suggestion_list = self.spellchecker.suggest(incorrect_word)
+            if self.verbosity:
+                print(incorrect_word + "\n")
+                for word in suggestion_list:
+                    print("\t" + word)
+            self.assertIn(correct_word, suggestion_list)
