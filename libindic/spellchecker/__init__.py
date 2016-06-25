@@ -13,8 +13,8 @@ class Malayalam:
         '''
         Initialize necessary resources.
         '''
-        self.dictionary_file = os.path.join(
-            os.path.dirname(__file__), 'data/ml_rootwords.txt')
+        self.dictionary_file = open(os.path.join(
+            os.path.dirname(__file__), 'data/ml_rootwords.txt'))
         self.dictionary = self.dictionary_file.readlines()
         self.dictionary_file.close()
         try:
