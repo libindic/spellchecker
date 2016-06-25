@@ -117,7 +117,6 @@ class Malayalam:
         else:
             next_char_pos = _characters.index(first_char) + 1
             next_char = _characters[next_char_pos]
-        print(first_char, prev_char, next_char)
         possible_words = self.dictionary.keys(first_char) +\
             self.dictionary.keys(next_char) +\
             self.dictionary.keys(prev_char)
