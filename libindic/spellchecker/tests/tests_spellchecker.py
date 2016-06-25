@@ -43,6 +43,8 @@ class MalayalamSpellcheckerTest(TestCase):
         Test if correct word is in the list of suggestions generated.
         '''
         words = collections.OrderedDict({u'ബാരതം': u'ഭാരതം',
+                                         u'അദ്യാപകന്‍': u'അധ്യാപകന്‍',
+                                         u'ഹലാകലം': u'ഹലാഹലം'
                                          })
         for incorrect_word, correct_word in words.items():
             suggestion_list = self.spellchecker.suggest(incorrect_word)
