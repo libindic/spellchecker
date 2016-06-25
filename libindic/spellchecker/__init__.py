@@ -30,8 +30,6 @@ class Malayalam:
         Returns if a word is spelled correctly or not.
         '''
         root_word = self.stemmer.stem(word)[word]['stem']
-        if root_word == word:
-            return True
         if root_word in self.dictionary:
             return True
         else:
