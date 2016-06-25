@@ -29,7 +29,13 @@ class Malayalam:
         '''
         Returns if a word is spelled correctly or not.
         '''
-        pass
+        root_word = self.stemmer.stem(word)[word]['stem']
+        if root_word == word:
+            return True
+        if root_word in self.dictionary:
+            return True
+        else:
+            return False
 
     def suggest(self, word, n=10):
         '''
