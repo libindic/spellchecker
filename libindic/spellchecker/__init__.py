@@ -135,3 +135,22 @@ class Malayalam:
         levenshtein_distance = Levenshtein.distance(word1, word2)
         soundex_comparison = self.soundex.compare(word1, word2)
         return levenshtein_distance, soundex_comparison
+
+    def check_and_generate(self, word):
+        '''
+        Receives a word as input, checks if it is a valid word and returns
+        the suggestions if it is not.
+        '''
+        status = self.check(word)
+        if status:
+            return {'status': True, 'suggestions': []}
+        else:
+            suggestions = self.suggest(word)
+            if suggestions:
+                return {'status': False, 'suggestions': suggestions}
+            else:
+                # If there were no suggestions, it means the word was not
+                # similar to any of the existing root words. So, that was not a
+                # mistake, but an intended insertion. Hence, it is deemed as a
+                # valid word
+                return {'status': True, 'suggestions': []}
