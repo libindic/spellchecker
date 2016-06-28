@@ -3,8 +3,8 @@
 
 import os
 
-import Levenshtein
 import marisa_trie
+from indicsyllabifier import Syllabalizer
 from libindic.stemmer import Malayalam as Stemmer
 from soundex import Soundex
 
@@ -91,6 +91,7 @@ class Malayalam:
                 [x.strip() for x in self.dictionary])
         self.stemmer = Stemmer()
         self.soundex = Soundex()
+        self.syllabalizer = Syllabalizer()
 
     def check(self, word):
         '''
@@ -125,17 +126,45 @@ class Malayalam:
         for word in possible_words:
             lev, sound = self.compare(input_word, word)
             suggestion_item = Suggestion(input_word, word, lev, sound)
-            if lev < 10:
+            if lev < 5:
                 final.append(suggestion_item)
         sorted_list = sorted(final, key=lambda x: x.lev)[:n]
         return [x.value for x in sorted_list]
+
+    def levenshtein_distance(self, tokens1, tokens2):
+        '''
+        Takes two lists containing tokens of one word each and returns the
+        levenshtein distance between them.
+        '''
+        if len(tokens1) < len(tokens2):
+            return self.levenshtein_distance(tokens2, tokens1)
+
+        # len(tokens1) >= len(tokens2)
+        if len(tokens2) == 0:
+            return len(tokens1)
+
+        previous_row = range(len(tokens2) + 1)
+        for i, c1 in enumerate(tokens1):
+            current_row = [i + 1]
+            for j, c2 in enumerate(tokens2):
+                # j+1 instead of j since previous_row and current_row are one
+                # character longer
+                insertions = previous_row[j + 1] + 1
+                deletions = current_row[j] + 1       # than tokens2
+                substitutions = previous_row[j] + (c1 != c2)
+                current_row.append(min(insertions, deletions, substitutions))
+            previous_row = current_row
+
+        return previous_row[-1]
 
     def compare(self, word1, word2):
         '''
         Returns the similarity measure between two words.
         '''
-        levenshtein_distance = Levenshtein.distance(word1, word2)
         soundex_comparison = self.soundex.compare(word1, word2)
+        tokens1 = self.syllabalizer.syllabify_ml(word1)
+        tokens2 = self.syllabalizer.syllabify_ml(word2)
+        levenshtein_distance = self.levenshtein_distance(tokens1, tokens2)
         return levenshtein_distance, soundex_comparison
 
     def check_and_generate(self, word):
