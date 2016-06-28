@@ -106,6 +106,7 @@ class Malayalam:
         '''
         Returns n suggestions that is similar to word.
         '''
+        input_word = self.stemmer.stem(input_word)[input_word]['stem']
         first_char = input_word[0]
         if first_char == _characters[0]:
             prev_char = first_char
