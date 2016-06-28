@@ -23,7 +23,7 @@ class MalayalamSpellcheckerTest(TestCase):
                      u'ദേവി'
                      ]
         for word in true_list:
-            status = self.spellchecker.check(word)
+            status = self.spellchecker.check_and_generate(word)['status']
             if self.verbosity:
                 print("%s  :  %s" % (word, status))
             assert status
@@ -33,10 +33,19 @@ class MalayalamSpellcheckerTest(TestCase):
                       u'ദേബി'
                       ]
         for word in false_list:
-            status = self.spellchecker.check(word)
+            status = self.spellchecker.check_and_generate(word)['status']
             if self.verbosity:
                 print("%s  :  %s" % (word, status))
             assert not status
+
+        custom_words = [u'സ്യൂഡോനാഷണലിസ്റ്റ്']
+        # Words that are not found in dictionary, but unique and thus deemed
+        # valid
+        for word in custom_words:
+            status = self.spellchecker.check_and_generate(word)['status']
+            if self.verbosity:
+                print("%s  :  %s" % (word, status))
+            assert status
 
     def test_suggestion_generation(self):
         '''
