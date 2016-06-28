@@ -124,7 +124,8 @@ class Malayalam:
         for word in possible_words:
             lev, sound = self.compare(input_word, word)
             suggestion_item = Suggestion(input_word, word, lev, sound)
-            final.append(suggestion_item)
+            if lev < 10:
+                final.append(suggestion_item)
         sorted_list = sorted(final, key=lambda x: x.lev)[:n]
         return [x.value for x in sorted_list]
 
