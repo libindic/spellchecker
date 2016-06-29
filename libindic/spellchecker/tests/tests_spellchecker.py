@@ -4,6 +4,7 @@
 import collections
 
 from libindic import spellchecker
+from libindic.stemmer import Malayalam as stemmer
 from testtools import TestCase
 
 
@@ -12,6 +13,7 @@ class MalayalamSpellcheckerTest(TestCase):
     def setUp(self):
         super(MalayalamSpellcheckerTest, self).setUp()
         self.spellchecker = spellchecker.Malayalam()
+        self.stemmer = stemmer()
         self.verbosity = False
 
     def test_checking(self):
@@ -58,6 +60,9 @@ class MalayalamSpellcheckerTest(TestCase):
                                          u'അദ്യാപഗനോട്': u'അധ്യാപകനോട്'
                                          })
         for incorrect_word, correct_word in words.items():
+            incorrect_word = self.stemmer.singleencode(incorrect_word)
+            print incorrect_word.encode('utf-8').split()
+            correct_word = self.stemmer.singleencode(correct_word)
             suggestion_list = self.spellchecker.suggest(incorrect_word)
             if self.verbosity:
                 print(incorrect_word + "\n")
