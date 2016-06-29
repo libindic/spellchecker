@@ -61,7 +61,6 @@ class MalayalamSpellcheckerTest(TestCase):
                                          })
         for incorrect_word, correct_word in words.items():
             incorrect_word = self.stemmer.singleencode(incorrect_word)
-            print incorrect_word.encode('utf-8').split()
             correct_word = self.stemmer.singleencode(correct_word)
             suggestion_list = self.spellchecker.suggest(incorrect_word)
             if self.verbosity:
