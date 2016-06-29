@@ -24,6 +24,7 @@ import os
 import marisa_trie
 from indicsyllabifier import Syllabalizer
 from libindic.stemmer import Malayalam as Stemmer
+from libindic.inflector import Malayalam as Inflector
 from soundex import Soundex
 
 _characters = [u'\u0d05',
@@ -110,6 +111,7 @@ class Malayalam:
         self.stemmer = Stemmer()
         self.soundex = Soundex()
         self.syllabalizer = Syllabalizer()
+        self.inflector = Inflector()
 
     def check(self, word):
         '''
@@ -125,7 +127,9 @@ class Malayalam:
         '''
         Returns n suggestions that is similar to word.
         '''
-        input_word = self.stemmer.stem(input_word)[input_word]['stem']
+        stemmer_result = self.stemmer.stem(input_word)[input_word]
+        input_word = stemmer_result['stem']
+        tag_list = stemmer_result['inflection']
         first_char = input_word[0]
         if first_char == _characters[0]:
             prev_char = first_char
@@ -147,7 +151,15 @@ class Malayalam:
             if lev < 5:
                 final.append(suggestion_item)
         sorted_list = sorted(final, key=lambda x: x.lev)[:n]
-        return [x.value for x in sorted_list]
+        final_list = []
+        for item in sorted_list:
+            word = item.value
+            try:
+                inflected_form = self.inflector.inflect(word, tag_list)
+                final_list.append(inflected_form)
+            except:
+                continue
+        return final_list
 
     def levenshtein_distance(self, tokens1, tokens2):
         '''
