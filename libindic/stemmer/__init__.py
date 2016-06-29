@@ -52,12 +52,20 @@ class Malayalam:
         '''
         Normalize word to single encoding.
         '''
-        replace = {'\\u0d15\\u0d4d\\u200d': '\\u0d7f',
-                   '\\u0d23\\u0d4d\\u200d': '\\u0d7a',
-                   '\\u0d28\\u0d4d\\u200d': '\\u0d7b',
-                   '\\u0d30\\u0d4d\\u200d': '\\u0d7c',
-                   '\\u0d32\\u0d4d\\u200d': '\\u0d7d',
-                   '\\u0d33\\u0d4d\\u200d': '\\u0d7e'}
+        try:
+            replace = {u'\u0d15\u0d4d\u200d': u'\u0d7f',
+                       u'\u0d23\u0d4d\u200d': u'\u0d7a',
+                       u'\u0d28\u0d4d\u200d': u'\u0d7b',
+                       u'\u0d30\u0d4d\u200d': u'\u0d7c',
+                       u'\u0d32\u0d4d\u200d': u'\u0d7d',
+                       u'\u0d33\u0d4d\u200d': u'\u0d7e'}
+        except:
+            replace = {'\u0d15\u0d4d\u200d': '\u0d7f',
+                       '\u0d23\u0d4d\u200d': '\u0d7a',
+                       '\u0d28\u0d4d\u200d': '\u0d7b',
+                       '\u0d30\u0d4d\u200d': '\u0d7c',
+                       '\u0d32\u0d4d\u200d': '\u0d7d',
+                       '\u0d33\u0d4d\u200d': '\u0d7e'}
         for character in replace:
             word = word.replace(character, replace[character])
         return word
