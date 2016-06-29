@@ -148,7 +148,7 @@ class Malayalam:
         for word in possible_words:
             lev, sound = self.compare(input_word, word)
             suggestion_item = Suggestion(input_word, word, lev, sound)
-            if lev < 5:
+            if ((lev < 5 and sound in [0, 1]) or lev < 2):
                 final.append(suggestion_item)
         sorted_list = sorted(final, key=lambda x: x.lev)[:n]
         final_list = []
@@ -201,17 +201,20 @@ class Malayalam:
         '''
         Receives a word as input, checks if it is a valid word and returns
         the suggestions if it is not.
+        Returns 0 along with suggestions if an incorrect word.
+        Returns 1 along with blank list of suggestions if word in dictionary.
+        Returns 2 along with blank list of suggestions if word is unique.
         '''
         status = self.check(word)
         if status:
-            return {'status': True, 'suggestions': []}
+            return {'status': 1, 'suggestions': []}
         else:
             suggestions = self.suggest(word)
             if suggestions:
-                return {'status': False, 'suggestions': suggestions}
+                return {'status': 0, 'suggestions': suggestions}
             else:
                 # If there were no suggestions, it means the word was not
                 # similar to any of the existing root words. So, that was not a
                 # mistake, but an intended insertion. Hence, it is deemed as a
                 # valid word
-                return {'status': True, 'suggestions': []}
+                return {'status': 2, 'suggestions': []}
