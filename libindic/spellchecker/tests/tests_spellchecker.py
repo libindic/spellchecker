@@ -53,7 +53,9 @@ class MalayalamSpellcheckerTest(TestCase):
         '''
         words = collections.OrderedDict({u'ബാരതം': u'ഭാരതം',
                                          u'അദ്യാപകന്‍': u'അധ്യാപകൻ',
-                                         u'ഹലാകലം': u'ഹലാഹലം'
+                                         u'ഹലാകലം': u'ഹലാഹലം',
+                                         u'ബാരതത്തിന്റെ': u'ഭാരതത്തിന്റെ',
+                                         u'അദ്യാപഗനോട്': u'അധ്യാപകനോട്'
                                          })
         for incorrect_word, correct_word in words.items():
             suggestion_list = self.spellchecker.suggest(incorrect_word)
