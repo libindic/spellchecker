@@ -2,3 +2,4 @@ marisa_trie
 rreplace
 soundex
 indicsyllabifier
+indicngram

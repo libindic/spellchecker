@@ -23,6 +23,7 @@ import os
 
 import marisa_trie
 from indicsyllabifier import Syllabalizer
+from indicngram import Ngram
 from libindic.stemmer import Malayalam as Stemmer
 from libindic.inflector import Malayalam as Inflector
 from soundex import Soundex
@@ -85,11 +86,12 @@ class Suggestion:
     Class to hold each suggestion for an incorrect word.
     '''
 
-    def __init__(self, input_word, value, lev, sound):
+    def __init__(self, input_word, value, lev, sound, jac):
         self.input_word = input_word
         self.value = value
         self.lev = lev
         self.sound = sound
+        self.jac = jac
 
 
 class Malayalam:
@@ -112,6 +114,7 @@ class Malayalam:
         self.soundex = Soundex()
         self.syllabalizer = Syllabalizer()
         self.inflector = Inflector()
+        self.ngrammer = Ngram()
 
     def check(self, word):
         '''
@@ -146,11 +149,11 @@ class Malayalam:
             self.dictionary.keys(prev_char)
         final = []
         for word in possible_words:
-            lev, sound = self.compare(input_word, word)
-            suggestion_item = Suggestion(input_word, word, lev, sound)
-            if ((lev < 5 and sound in [0, 1]) or lev < 2):
+            lev, sound, jac = self.compare(input_word, word)
+            suggestion_item = Suggestion(input_word, word, lev, sound, jac)
+            if ((lev < 5 and sound in [0, 1]) or lev < 2 or jac > 0.5):
                 final.append(suggestion_item)
-        sorted_list = sorted(final, key=lambda x: x.lev)[:n]
+        sorted_list = sorted(final, key=lambda x: (x.lev, x.jac))[:n][::-1]
         final_list = []
         for item in sorted_list:
             word = item.value
@@ -195,7 +198,23 @@ class Malayalam:
         tokens1 = self.syllabalizer.syllabify_ml(word1)
         tokens2 = self.syllabalizer.syllabify_ml(word2)
         levenshtein_distance = self.levenshtein_distance(tokens1, tokens2)
-        return levenshtein_distance, soundex_comparison
+        ngram1 = self.ngrammer.letterNgram(word1)
+        ngram2 = self.ngrammer.letterNgram(word2)
+        total = ngram1 + ngram2
+        union = []
+        for counter in range(len(total)):
+            item = total[counter]
+            if item not in union:
+                union.append(item)
+        final = [x for x in ngram1 if x in ngram2] +\
+            [x for x in ngram2 if x in ngram1]
+        intersection = []
+        for counter in range(len(final)):
+            item = final[counter]
+            if item not in intersection:
+                intersection.append(item)
+        jaccards = float(len(intersection)) / float(len(union))
+        return levenshtein_distance, soundex_comparison, jaccards
 
     def check_and_generate(self, word):
         '''
