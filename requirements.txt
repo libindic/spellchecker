@@ -1,5 +1,5 @@
 marisa_trie
 rreplace
-soundex
-indicsyllabifier
-indicngram
+git+https://github.com/libindic/soundex.git#egg=soundex
+git+https://github.com/balasankarc/indicngram.git#egg=indicngram
+git+https://github.com/libindic/syllabalizer.git#egg=indicsyllabifier
