@@ -20,12 +20,14 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 import os
+from collections import namedtuple
+from operator import attrgetter
 
 import marisa_trie
-from indicsyllabifier import Syllabalizer
 from indicngram import Ngram
-from libindic.stemmer import Malayalam as Stemmer
+from indicsyllabifier import Syllabalizer
 from libindic.inflector import Malayalam as Inflector
+from libindic.stemmer import Malayalam as Stemmer
 from soundex import Soundex
 
 _characters = [u'\u0d05',
@@ -80,18 +82,7 @@ _characters = [u'\u0d05',
                u'\u0d38',
                u'\u0d39']
 
-
-class Suggestion:
-    '''
-    Class to hold each suggestion for an incorrect word.
-    '''
-
-    def __init__(self, input_word, value, lev, sound, jac):
-        self.input_word = input_word
-        self.value = value
-        self.lev = lev
-        self.sound = sound
-        self.jac = jac
+Suggestion = namedtuple('Suggestion', 'word sound lev jac weight')
 
 
 class Malayalam:
@@ -126,7 +117,7 @@ class Malayalam:
         else:
             return False
 
-    def suggest(self, input_word, n=10):
+    def suggest(self, input_word, n=5):
         '''
         Returns n suggestions that is similar to word.
         '''
@@ -148,19 +139,24 @@ class Malayalam:
             self.dictionary.keys(next_char) +\
             self.dictionary.keys(prev_char)
         final = []
+
         for word in possible_words:
-            lev, sound, jac = self.compare(input_word, word)
-            suggestion_item = Suggestion(input_word, word, lev, sound, jac)
-            if ((lev < 5 and sound in [0, 1]) or lev < 2 or jac > 0.5):
+            lev, sound, jac, weight = self.compare(input_word, word)
+            suggestion_item = Suggestion(word, sound, lev, jac, weight)
+            if weight > 50:
                 final.append(suggestion_item)
-        sorted_list = sorted(final, key=lambda x: (x.lev, x.jac))[:n][::-1]
+        sorted_list = sorted(final, key=attrgetter('weight'), reverse=True)[:n]
         final_list = []
         for item in sorted_list:
-            word = item.value
+            word = item.word
             try:
                 inflected_form = self.inflector.inflect(word, tag_list)
                 final_list.append(inflected_form)
-            except:
+                # string = inflected_form + " | " + str(item.sound) +\
+                # " | " + str(item.lev) + " | " + str(item.jac) +\
+                # " | " + str(item.weight)
+                # final_list.append(string)
+            except Exception as e:
                 continue
         return final_list
 
@@ -198,8 +194,12 @@ class Malayalam:
         tokens1 = self.syllabalizer.syllabify_ml(word1)
         tokens2 = self.syllabalizer.syllabify_ml(word2)
         levenshtein_distance = self.levenshtein_distance(tokens1, tokens2)
-        ngram1 = self.ngrammer.letterNgram(word1)
-        ngram2 = self.ngrammer.letterNgram(word2)
+        if len(tokens1) < 3 or len(tokens2) < 3:
+            n = 1
+        else:
+            n = 2
+        ngram1 = self.ngrammer.letterNgram(word1, 1)
+        ngram2 = self.ngrammer.letterNgram(word2, 1)
         total = ngram1 + ngram2
         union = []
         for counter in range(len(total)):
@@ -214,7 +214,15 @@ class Malayalam:
             if item not in intersection:
                 intersection.append(item)
         jaccards = float(len(intersection)) / float(len(union))
-        return levenshtein_distance, soundex_comparison, jaccards
+        if soundex_comparison == 1 or soundex_comparison == 0:
+            weight = 100
+        elif levenshtein_distance <= 2 and jaccards > 0.5:
+            weight = 75 + (1.5 * jaccards)
+        elif levenshtein_distance < 5 and jaccards > 0.2:
+            weight = 65 + (3 * jaccards)
+        else:
+            weight = 0
+        return levenshtein_distance, soundex_comparison, jaccards, weight
 
     def check_and_generate(self, word):
         '''
