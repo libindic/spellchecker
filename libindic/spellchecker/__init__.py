@@ -156,7 +156,7 @@ class Malayalam:
                 # " | " + str(item.lev) + " | " + str(item.jac) +\
                 # " | " + str(item.weight)
                 # final_list.append(string)
-            except Exception as e:
+            except:
                 continue
         return final_list
 
