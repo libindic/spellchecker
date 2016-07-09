@@ -1,6 +1,6 @@
 travis:
 	python setup.py test --coverage \
-		--coverage-package-name=libindic.spellchecker
+		--coverage-package-name=spellchecker
 	flake8 --max-complexity 10 libindic/spellchecker
 clean:
 	find . -iname "*.pyc" -exec rm -vf {} \;
