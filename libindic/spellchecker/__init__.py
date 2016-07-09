@@ -194,10 +194,6 @@ class Malayalam:
         tokens1 = self.syllabalizer.syllabify_ml(word1)
         tokens2 = self.syllabalizer.syllabify_ml(word2)
         levenshtein_distance = self.levenshtein_distance(tokens1, tokens2)
-        if len(tokens1) < 3 or len(tokens2) < 3:
-            n = 1
-        else:
-            n = 2
         ngram1 = self.ngrammer.letterNgram(word1, 1)
         ngram2 = self.ngrammer.letterNgram(word2, 1)
         total = ngram1 + ngram2
@@ -245,4 +241,3 @@ class Malayalam:
                 # mistake, but an intended insertion. Hence, it is deemed as a
                 # valid word
                 return {'status': 2, 'suggestions': []}
-
