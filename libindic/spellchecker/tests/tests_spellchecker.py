@@ -3,16 +3,17 @@
 
 import collections
 
-from libindic import spellchecker
 from libindic.stemmer import Malayalam as stemmer
 from testtools import TestCase
+
+from .. import Malayalam as spellchecker
 
 
 class MalayalamSpellcheckerTest(TestCase):
 
     def setUp(self):
         super(MalayalamSpellcheckerTest, self).setUp()
-        self.spellchecker = spellchecker.Malayalam()
+        self.spellchecker = spellchecker()
         self.stemmer = stemmer()
         self.verbosity = False
 
