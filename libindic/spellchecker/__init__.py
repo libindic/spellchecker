@@ -24,9 +24,9 @@ from collections import namedtuple
 from operator import attrgetter
 
 import marisa_trie
-from indicngram import Ngram
 from indicsyllabifier import Syllabalizer
 from libindic.inflector import Malayalam as Inflector
+from libindic.ngram import Ngram
 from libindic.stemmer import Malayalam as Stemmer
 from soundex import Soundex
 
@@ -245,3 +245,4 @@ class Malayalam:
                 # mistake, but an intended insertion. Hence, it is deemed as a
                 # valid word
                 return {'status': 2, 'suggestions': []}
+
