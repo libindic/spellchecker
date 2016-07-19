@@ -25,9 +25,9 @@ from operator import attrgetter
 
 import marisa_trie
 from indicsyllabifier import Syllabalizer
-from libindic.inflector import Malayalam as Inflector
 from libindic.ngram import Ngram
 from libindic.stemmer import Malayalam as Stemmer
+from libindic.stemmer import inflector
 from soundex import Soundex
 
 _characters = [u'\u0d05',
@@ -102,9 +102,9 @@ class Malayalam:
             self.dictionary = marisa_trie.Trie(
                 [x.strip() for x in self.dictionary])
         self.stemmer = Stemmer()
+        self.inflector = inflector.Inflector(lang='ml')
         self.soundex = Soundex()
         self.syllabalizer = Syllabalizer()
-        self.inflector = Inflector()
         self.ngrammer = Ngram()
 
     def check(self, word):
