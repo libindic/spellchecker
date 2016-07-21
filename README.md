@@ -1,9 +1,9 @@
-Spell Check Module
-==================
+# LibIndic Spellchecker
 
-This more of an experimental module to over come the drawbacks of problems
-found in Aspell and Hunspell with Indian languages. This module page is[ here](http://silpa.org.in/SpellCheck)
+[![Build Status](https://travis-ci.org/balasankarc/spellchecker.svg?branch=master)](https://travis-ci.org/balasankarc/spellchecker)
+[![Coverage Status](https://coveralls.io/repos/github/balasankarc/spellchecker/badge.svg?branch=master)](https://coveralls.io/github/balasankarc/spellchecker?branch=master)
 
-Run tests by using `python setup.py test`. Read the
-[docs](http://spellchecker.readthedocs.org/en/latest/)
-to find out more.
+LibIndic's spellchecker module may be used to detect spelling mistakes in a
+word. If a spelling mistake is found, it generates valid root words as
+suggestions that have a higher probability being the word user actually 
+intended to use.
