@@ -122,6 +122,7 @@ class Malayalam:
         Returns n suggestions that is similar to word.
         '''
         stemmer_result = self.stemmer.stem(input_word)[input_word]
+        original_word = input_word
         input_word = stemmer_result['stem']
         tag_list = stemmer_result['inflection']
         first_char = input_word[0]
@@ -139,9 +140,13 @@ class Malayalam:
             self.dictionary.keys(next_char) +\
             self.dictionary.keys(prev_char)
         final = []
-
         for word in possible_words:
             lev, sound, jac, weight = self.compare(input_word, word)
+            lev1, sound1, jac1, weight1 = self.compare(original_word, word)
+            lev = min(lev1, lev)
+            sound = min(sound1, sound)
+            jac = max(jac1, jac)
+            weight = max(weight1, weight)
             suggestion_item = Suggestion(word, sound, lev, jac, weight)
             if weight > 50:
                 final.append(suggestion_item)
@@ -151,12 +156,11 @@ class Malayalam:
             word = item.word
             try:
                 inflected_form = self.inflector.inflect(word, tag_list)
-                final_list.append(inflected_form)
-                # string = inflected_form + " | " + str(item.sound) +\
-                # " | " + str(item.lev) + " | " + str(item.jac) +\
-                # " | " + str(item.weight)
-                # final_list.append(string)
+                if inflected_form not in final_list:
+                    final_list.append(inflected_form)
             except:
+                if word not in final_list:
+                    final_list.append(word)
                 continue
         return final_list
 
@@ -168,7 +172,6 @@ class Malayalam:
         if len(tokens1) < len(tokens2):
             return self.levenshtein_distance(tokens2, tokens1)
 
-        # len(tokens1) >= len(tokens2)
         if len(tokens2) == 0:
             return len(tokens1)
 
@@ -214,7 +217,7 @@ class Malayalam:
             weight = 100
         elif levenshtein_distance <= 2 and jaccards > 0.5:
             weight = 75 + (1.5 * jaccards)
-        elif levenshtein_distance < 5 and jaccards > 0.2:
+        elif levenshtein_distance < 5 and jaccards > 0.5:
             weight = 65 + (3 * jaccards)
         else:
             weight = 0
