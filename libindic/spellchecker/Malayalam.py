@@ -82,7 +82,7 @@ _characters = [u'\u0d05',
                u'\u0d38',
                u'\u0d39']
 
-Suggestion = namedtuple('Suggestion', 'word sound lev jac weight')
+Suggestion = namedtuple('Suggestion', 'word sound lev jac weight tag_list')
 
 
 class Malayalam:
@@ -117,12 +117,49 @@ class Malayalam:
         else:
             return False
 
+    def get_best_intermediate(self, word, input_word,
+                              intermediate_words, original_tag_list):
+        '''
+        Return the best intermediate form from those generated during stemming.
+        '''
+        lev = []
+        sound = []
+        jac = []
+        weight = []
+        word_tags_map = {}
+        selected_word = input_word
+        highest_weight = 0
+        for intr_counter in range(len(intermediate_words)):
+            intermediate_word = intermediate_words[intr_counter]
+            lev_tmp, sound_tmp, jac_tmp, weight_tmp = self.compare(
+                intermediate_word, word)
+            lev.append(lev_tmp)
+            sound.append(sound_tmp)
+            jac.append(jac_tmp)
+            weight.append(weight_tmp)
+            word_tags_map[intermediate_word] = original_tag_list[:intr_counter]
+        if len(weight) > 0:
+            highest_weight = max(weight)
+            position = weight.index(highest_weight)
+            selected_word = intermediate_words[position]
+            lev = lev[position]
+        return word_tags_map, highest_weight, selected_word
+
+    def get_unique(self, list_of_items):
+        '''
+        Remove duplicates from the input list.
+        '''
+        result = []
+        for item in list_of_items:
+            if item not in result:
+                result.append(item)
+        return result
+
     def suggest(self, input_word, n=5):
         '''
         Returns n suggestions that is similar to word.
         '''
         stemmer_result = self.stemmer.stem(input_word)[input_word]
-        original_word = input_word
         input_word = stemmer_result['stem']
         tag_list = stemmer_result['inflection']
         first_char = input_word[0]
@@ -140,29 +177,38 @@ class Malayalam:
             self.dictionary.keys(next_char) +\
             self.dictionary.keys(prev_char)
         final = []
+        intermediate_words = []
+        original_tag_list = tag_list
+        intermediate_words.append(input_word)
+        for tag_counter in range(len(tag_list)):
+            new_word = self.inflector.inflect(
+                input_word, tag_list[-tag_counter - 1:])
+            intermediate_words.insert(0, new_word)
         for word in possible_words:
-            lev, sound, jac, weight = self.compare(input_word, word)
-            lev1, sound1, jac1, weight1 = self.compare(original_word, word)
-            lev = min(lev1, lev)
-            sound = min(sound1, sound)
-            jac = max(jac1, jac)
-            weight = max(weight1, weight)
-            suggestion_item = Suggestion(word, sound, lev, jac, weight)
+            lev, sound, jac, weight1 = self.compare(input_word, word)
+            word_tags_map, highest_weight, selected_word =\
+                self.get_best_intermediate(
+                    word, input_word, intermediate_words, original_tag_list)
+            tag_list = original_tag_list
+            if highest_weight >= weight1 and selected_word != input_word:
+                tag_list = word_tags_map[selected_word]
+            weight = max(weight1, highest_weight)
+            suggestion_item = Suggestion(
+                word, sound, lev, jac, weight, tag_list)
             if weight > 50:
                 final.append(suggestion_item)
         sorted_list = sorted(final, key=attrgetter('weight'), reverse=True)[:n]
         final_list = []
         for item in sorted_list:
             word = item.word
+            tag_list = item.tag_list
             try:
                 inflected_form = self.inflector.inflect(word, tag_list)
-                if inflected_form not in final_list:
-                    final_list.append(inflected_form)
+                final_list.append(inflected_form)
             except:
-                if word not in final_list:
-                    final_list.append(word)
+                final_list.append(word)
                 continue
-        return final_list
+        return self.get_unique(final_list)
 
     def levenshtein_distance(self, tokens1, tokens2):
         '''
