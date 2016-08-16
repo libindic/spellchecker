@@ -82,15 +82,18 @@ _characters = [u'\u0d05',
                u'\u0d38',
                u'\u0d39']
 
-Suggestion = namedtuple('Suggestion', 'word sound lev jac weight tag_list')
-
 
 class Malayalam:
+    """
+    Malayalam Spell Checker class.
+    """
+
+    Suggestion = namedtuple('Suggestion', 'word sound lev jac weight tag_list')
 
     def __init__(self):
-        '''
+        """
         Initialize necessary resources.
-        '''
+        """
         self.dictionary_file = open(os.path.join(
             os.path.dirname(__file__), 'data/ml_rootwords.txt'))
         self.dictionary = self.dictionary_file.readlines()
@@ -108,9 +111,9 @@ class Malayalam:
         self.ngrammer = Ngram()
 
     def check(self, word):
-        '''
+        """
         Returns if a word is spelled correctly or not.
-        '''
+        """
         root_word = self.stemmer.stem(word)[word]['stem']
         if root_word in self.dictionary:
             return True
@@ -119,9 +122,12 @@ class Malayalam:
 
     def get_best_intermediate(self, word, input_word,
                               intermediate_words, original_tag_list):
-        '''
+        """
         Return the best intermediate form from those generated during stemming.
-        '''
+        Best intermediate term is the one for which maximum similarity is
+        found. It is used to handle incorrect words getting unnecessarily
+        stemmed as they are not present in dictionary.
+        """
         lev = []
         sound = []
         jac = []
@@ -146,9 +152,6 @@ class Malayalam:
         return word_tags_map, highest_weight, selected_word
 
     def get_unique(self, list_of_items):
-        '''
-        Remove duplicates from the input list.
-        '''
         result = []
         for item in list_of_items:
             if item not in result:
@@ -156,9 +159,9 @@ class Malayalam:
         return result
 
     def suggest(self, input_word, n=5):
-        '''
+        """
         Returns n suggestions that is similar to word.
-        '''
+        """
         stemmer_result = self.stemmer.stem(input_word)[input_word]
         input_word = stemmer_result['stem']
         tag_list = stemmer_result['inflection']
@@ -193,7 +196,7 @@ class Malayalam:
             if highest_weight >= weight1 and selected_word != input_word:
                 tag_list = word_tags_map[selected_word]
             weight = max(weight1, highest_weight)
-            suggestion_item = Suggestion(
+            suggestion_item = Malayalam.Suggestion(
                 word, sound, lev, jac, weight, tag_list)
             if weight > 50:
                 final.append(suggestion_item)
@@ -211,10 +214,10 @@ class Malayalam:
         return self.get_unique(final_list)
 
     def levenshtein_distance(self, tokens1, tokens2):
-        '''
+        """
         Takes two lists containing tokens of one word each and returns the
         levenshtein distance between them.
-        '''
+        """
         if len(tokens1) < len(tokens2):
             return self.levenshtein_distance(tokens2, tokens1)
 
@@ -236,9 +239,9 @@ class Malayalam:
         return previous_row[-1]
 
     def compare(self, word1, word2):
-        '''
+        """
         Returns the similarity measure between two words.
-        '''
+        """
         soundex_comparison = self.soundex.compare(word1, word2)
         tokens1 = self.syllabalizer.syllabify_ml(word1)
         tokens2 = self.syllabalizer.syllabify_ml(word2)
@@ -270,13 +273,13 @@ class Malayalam:
         return levenshtein_distance, soundex_comparison, jaccards, weight
 
     def check_and_generate(self, word):
-        '''
+        """
         Receives a word as input, checks if it is a valid word and returns
         the suggestions if it is not.
         Returns 0 along with suggestions if an incorrect word.
         Returns 1 along with blank list of suggestions if word in dictionary.
         Returns 2 along with blank list of suggestions if word is unique.
-        '''
+        """
         status = self.check(word)
         if status:
             return {'status': 1, 'suggestions': []}
