@@ -296,32 +296,67 @@ class BaseMalayalam:
                 # valid word
                 return {'status': 2, 'suggestions': []}
 
+
 class Malayalam(BaseMalayalam):
+
     def __init__(self):
-        super().__init__()
+        super(Malayalam, self).__init__()
+        # Let's give the spellchecker a boost.
         self.sandhi = Sandhisplitter()
 
     def check(self, word):
-        if super().check(word):
+        # Trivial case, word is in corpus
+        if super(Malayalam, self).check(word):
             return True
+
+        # Sandhisplitter additions
+        # Check for each split word if word exists in corpus
+        # Increases True Positives, Reduces False Negatives
         words, splits = self.sandhi.split(word)
         for w in words:
-            if not super().check(w):
+            if not super(Malayalam, self).check(w):
                 return False
         return True
 
     def suggest(self, word, n=5):
-        suggestions = super().suggest(word, n)
+        # Start with bases suggestions
+        suggestions = super(Malayalam, self).suggest(word, n)
+
+        # Sandhisplitter additions
         words, splits = self.sandhi.split(word)
         corrections = []
         for w in words:
-            print(w)
-            if super().check(w):
+            # Word in dictionary
+            if super(Malayalam, self).check(w):
                 corrections.append([w])
+            # Word not in dictionary
             else:
-                corrections.append(super().suggest(w, n))
+                corrections.append(super(Malayalam, self).suggest(w, n))
+
+        # Cross product to get all possibilities
         candidates = product(*corrections)
+
+        # Apply joiner on possibile tuples.
         for group in candidates:
             joined = self.sandhi.join(group)
             suggestions.append(joined)
-        return suggestions
+
+        # Scoring via levenstein, sort by levenshtein
+        scores = []
+        for suggestion in suggestions:
+            score = super(Malayalam, self).levenshtein_distance(
+                suggestion, word)
+            scores.append(score)
+
+        paired = list(zip(scores, suggestions))
+        paired.sort()
+        sorted_suggestions = []
+        for (score, suggestion) in paired:
+            sorted_suggestions.append(suggestion)
+
+        # Trim off to match n
+        if (len(sorted_suggestions) > n):
+            sorted_suggestions = sorted_suggestions[:n]
+
+        # And tadaa!!!
+        return sorted_suggestions
