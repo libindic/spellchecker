@@ -29,6 +29,8 @@ from libindic.ngram import Ngram
 from libindic.stemmer import Malayalam as Stemmer
 from libindic.stemmer import inflector
 from soundex import Soundex
+from sandhisplitter import Sandhisplitter
+from itertools import product
 
 _characters = [u'\u0d05',
                u'\u0d06',
@@ -83,7 +85,7 @@ _characters = [u'\u0d05',
                u'\u0d39']
 
 
-class Malayalam:
+class BaseMalayalam:
     """
     Malayalam Spell Checker class.
     """
@@ -293,3 +295,33 @@ class Malayalam:
                 # mistake, but an intended insertion. Hence, it is deemed as a
                 # valid word
                 return {'status': 2, 'suggestions': []}
+
+class Malayalam(BaseMalayalam):
+    def __init__(self):
+        super().__init__()
+        self.sandhi = Sandhisplitter()
+
+    def check(self, word):
+        if super().check(word):
+            return True
+        words, splits = self.sandhi.split(word)
+        for w in words:
+            if not super().check(w):
+                return False
+        return True
+
+    def suggest(self, word, n=5):
+        suggestions = super().suggest(word, n)
+        words, splits = self.sandhi.split(word)
+        corrections = []
+        for w in words:
+            print(w)
+            if super().check(w):
+                corrections.append([w])
+            else:
+                corrections.append(super().suggest(w, n))
+        candidates = product(*corrections)
+        for group in candidates:
+            joined = self.sandhi.join(group)
+            suggestions.append(joined)
+        return suggestions

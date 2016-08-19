@@ -3,3 +3,4 @@ git+https://github.com/libindic/soundex.git#egg=soundex
 git+https://github.com/libindic/indicngram.git#egg=libindic_ngram
 git+https://github.com/libindic/indicstemmer.git#egg=libindic_stemmer
 git+https://github.com/libindic/syllabalizer.git#egg=indicsyllabifier
+git+https://github.com/libindic/sandhi-splitter.git#egg=sandhisplitter
