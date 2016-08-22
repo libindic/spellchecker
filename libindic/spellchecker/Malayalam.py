@@ -41,7 +41,7 @@ _characters = [u'\u0d05',
                u'\u0d0e',
                u'\u0d0f',
                u'\u0d10',
-               u'\u0d11',
+               u'\u0d12',
                u'\u0d13',
                u'\u0d14',
                u'\u0d15',
@@ -82,15 +82,18 @@ _characters = [u'\u0d05',
                u'\u0d38',
                u'\u0d39']
 
-Suggestion = namedtuple('Suggestion', 'word sound lev jac weight')
-
 
 class Malayalam:
+    """
+    Malayalam Spell Checker class.
+    """
+
+    Suggestion = namedtuple('Suggestion', 'word sound lev jac weight tag_list')
 
     def __init__(self):
-        '''
+        """
         Initialize necessary resources.
-        '''
+        """
         self.dictionary_file = open(os.path.join(
             os.path.dirname(__file__), 'data/ml_rootwords.txt'))
         self.dictionary = self.dictionary_file.readlines()
@@ -108,19 +111,57 @@ class Malayalam:
         self.ngrammer = Ngram()
 
     def check(self, word):
-        '''
+        """
         Returns if a word is spelled correctly or not.
-        '''
+        """
         root_word = self.stemmer.stem(word)[word]['stem']
         if root_word in self.dictionary:
             return True
         else:
             return False
 
+    def get_best_intermediate(self, word, input_word,
+                              intermediate_words, original_tag_list):
+        """
+        Return the best intermediate form from those generated during stemming.
+        Best intermediate term is the one for which maximum similarity is
+        found. It is used to handle incorrect words getting unnecessarily
+        stemmed as they are not present in dictionary.
+        """
+        lev = []
+        sound = []
+        jac = []
+        weight = []
+        word_tags_map = {}
+        selected_word = input_word
+        highest_weight = 0
+        for intr_counter in range(len(intermediate_words)):
+            intermediate_word = intermediate_words[intr_counter]
+            lev_tmp, sound_tmp, jac_tmp, weight_tmp = self.compare(
+                intermediate_word, word)
+            lev.append(lev_tmp)
+            sound.append(sound_tmp)
+            jac.append(jac_tmp)
+            weight.append(weight_tmp)
+            word_tags_map[intermediate_word] = original_tag_list[:intr_counter]
+        if len(weight) > 0:
+            highest_weight = max(weight)
+            position = weight.index(highest_weight)
+            selected_word = intermediate_words[position]
+            lev = lev[position]
+        return word_tags_map, highest_weight, selected_word
+
+    def get_unique(self, list_of_items):
+        result = []
+        for item in list_of_items:
+            if item not in result:
+                result.append(item)
+        return result
+
     def suggest(self, input_word, n=5):
-        '''
+        """
         Returns n suggestions that is similar to word.
-        '''
+        """
         stemmer_result = self.stemmer.stem(input_word)[input_word]
         input_word = stemmer_result['stem']
         tag_list = stemmer_result['inflection']
@@ -139,36 +180,47 @@ class Malayalam:
             self.dictionary.keys(next_char) +\
             self.dictionary.keys(prev_char)
         final = []
-
+        intermediate_words = []
+        original_tag_list = tag_list
+        intermediate_words.append(input_word)
+        for tag_counter in range(len(tag_list)):
+            new_word = self.inflector.inflect(
+                input_word, tag_list[-tag_counter - 1:])
+            intermediate_words.insert(0, new_word)
         for word in possible_words:
-            lev, sound, jac, weight = self.compare(input_word, word)
-            suggestion_item = Suggestion(word, sound, lev, jac, weight)
+            lev, sound, jac, weight1 = self.compare(input_word, word)
+            word_tags_map, highest_weight, selected_word =\
+                self.get_best_intermediate(
+                    word, input_word, intermediate_words, original_tag_list)
+            tag_list = original_tag_list
+            if highest_weight >= weight1 and selected_word != input_word:
+                tag_list = word_tags_map[selected_word]
+            weight = max(weight1, highest_weight)
+            suggestion_item = Malayalam.Suggestion(
+                word, sound, lev, jac, weight, tag_list)
             if weight > 50:
                 final.append(suggestion_item)
         sorted_list = sorted(final, key=attrgetter('weight'), reverse=True)[:n]
         final_list = []
         for item in sorted_list:
             word = item.word
+            tag_list = item.tag_list
             try:
                 inflected_form = self.inflector.inflect(word, tag_list)
                 final_list.append(inflected_form)
-                # string = inflected_form + " | " + str(item.sound) +\
-                # " | " + str(item.lev) + " | " + str(item.jac) +\
-                # " | " + str(item.weight)
-                # final_list.append(string)
             except:
+                final_list.append(word)
                 continue
-        return final_list
+        return self.get_unique(final_list)
 
     def levenshtein_distance(self, tokens1, tokens2):
-        '''
+        """
         Takes two lists containing tokens of one word each and returns the
         levenshtein distance between them.
-        '''
+        """
         if len(tokens1) < len(tokens2):
             return self.levenshtein_distance(tokens2, tokens1)
 
-        # len(tokens1) >= len(tokens2)
         if len(tokens2) == 0:
             return len(tokens1)
 
@@ -187,9 +239,9 @@ class Malayalam:
         return previous_row[-1]
 
     def compare(self, word1, word2):
-        '''
+        """
         Returns the similarity measure between two words.
-        '''
+        """
         soundex_comparison = self.soundex.compare(word1, word2)
         tokens1 = self.syllabalizer.syllabify_ml(word1)
         tokens2 = self.syllabalizer.syllabify_ml(word2)
@@ -214,20 +266,20 @@ class Malayalam:
             weight = 100
         elif levenshtein_distance <= 2 and jaccards > 0.5:
             weight = 75 + (1.5 * jaccards)
-        elif levenshtein_distance < 5 and jaccards > 0.2:
+        elif levenshtein_distance < 5 and jaccards > 0.5:
             weight = 65 + (3 * jaccards)
         else:
             weight = 0
         return levenshtein_distance, soundex_comparison, jaccards, weight
 
     def check_and_generate(self, word):
-        '''
+        """
         Receives a word as input, checks if it is a valid word and returns
         the suggestions if it is not.
         Returns 0 along with suggestions if an incorrect word.
         Returns 1 along with blank list of suggestions if word in dictionary.
         Returns 2 along with blank list of suggestions if word is unique.
-        '''
+        """
         status = self.check(word)
         if status:
             return {'status': 1, 'suggestions': []}
