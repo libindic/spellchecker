@@ -297,7 +297,7 @@ class BaseMalayalam:
                 return {'status': 2, 'suggestions': []}
 
 
-class Malayalam(BaseMalayalam):
+class Malayalam(BaseMalayalam, object):
 
     def __init__(self):
         super(Malayalam, self).__init__()

@@ -6,7 +6,7 @@ import collections
 from libindic.stemmer import Malayalam as stemmer
 from testtools import TestCase
 
-from .. import Malayalam as spellchecker
+from ..Malayalam import BaseMalayalam as spellchecker
 
 
 class MalayalamSpellcheckerTest(TestCase):
