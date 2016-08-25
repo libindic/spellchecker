@@ -29,6 +29,8 @@ from libindic.ngram import Ngram
 from libindic.stemmer import Malayalam as Stemmer
 from libindic.stemmer import inflector
 from soundex import Soundex
+from sandhisplitter import Sandhisplitter
+from itertools import product
 
 _characters = [u'\u0d05',
                u'\u0d06',
@@ -83,7 +85,7 @@ _characters = [u'\u0d05',
                u'\u0d39']
 
 
-class Malayalam:
+class BaseMalayalam:
     """
     Malayalam Spell Checker class.
     """
@@ -293,3 +295,68 @@ class Malayalam:
                 # mistake, but an intended insertion. Hence, it is deemed as a
                 # valid word
                 return {'status': 2, 'suggestions': []}
+
+
+class Malayalam(BaseMalayalam, object):
+
+    def __init__(self):
+        super(Malayalam, self).__init__()
+        # Let's give the spellchecker a boost.
+        self.sandhi = Sandhisplitter()
+
+    def check(self, word):
+        # Trivial case, word is in corpus
+        if super(Malayalam, self).check(word):
+            return True
+
+        # Sandhisplitter additions
+        # Check for each split word if word exists in corpus
+        # Increases True Positives, Reduces False Negatives
+        words, splits = self.sandhi.split(word)
+        for w in words:
+            if not super(Malayalam, self).check(w):
+                return False
+        return True
+
+    def suggest(self, word, n=5):
+        # Start with bases suggestions
+        suggestions = super(Malayalam, self).suggest(word, n)
+
+        # Sandhisplitter additions
+        words, splits = self.sandhi.split(word)
+        corrections = []
+        for w in words:
+            # Word in dictionary
+            if super(Malayalam, self).check(w):
+                corrections.append([w])
+            # Word not in dictionary
+            else:
+                corrections.append(super(Malayalam, self).suggest(w, n))
+
+        # Cross product to get all possibilities
+        candidates = product(*corrections)
+
+        # Apply joiner on possibile tuples.
+        for group in candidates:
+            joined = self.sandhi.join(group)
+            suggestions.append(joined)
+
+        # Scoring via levenstein, sort by levenshtein
+        scores = []
+        for suggestion in suggestions:
+            score = super(Malayalam, self).levenshtein_distance(
+                suggestion, word)
+            scores.append(score)
+
+        paired = list(zip(scores, suggestions))
+        paired.sort()
+        sorted_suggestions = []
+        for (score, suggestion) in paired:
+            sorted_suggestions.append(suggestion)
+
+        # Trim off to match n
+        if (len(sorted_suggestions) > n):
+            sorted_suggestions = sorted_suggestions[:n]
+
+        # And tadaa!!!
+        return sorted_suggestions
