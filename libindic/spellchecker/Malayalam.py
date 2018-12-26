@@ -24,11 +24,11 @@ from collections import namedtuple
 from operator import attrgetter
 
 import marisa_trie
-from indicsyllabifier import Syllabalizer
+from libindic.syllabifier import Syllabifier
 from libindic.ngram import Ngram
 from libindic.stemmer import Malayalam as Stemmer
 from libindic.stemmer import inflector
-from soundex import Soundex
+from libindic.soundex import Soundex
 from sandhisplitter import Sandhisplitter
 from itertools import product
 
@@ -109,7 +109,7 @@ class BaseMalayalam:
         self.stemmer = Stemmer()
         self.inflector = inflector.Inflector(lang='ml')
         self.soundex = Soundex()
-        self.syllabalizer = Syllabalizer()
+        self.syllabalizer = Syllabifier()
         self.ngrammer = Ngram()
 
     def check(self, word):
