@@ -1,0 +1,149 @@
+{% extends "silpa.html" %}
+{% block modulescript %}
+<script>
+$(document).ready(function() {
+    var id_result = $('#result'),
+        id_error = $('#errormessage'),
+        id_progress = $('#progress');
+    $("form").submit(function(event)
+    {
+        event.preventDefault();
+        var word= $("input[name=word]", 'form').val(),
+            jsonRequest = {
+                module: "libindic.spellchecker",
+                method: "check",
+                params: [word],
+                id: ""
+            };
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: "api",
+            data: JSON.stringify(jsonRequest),
+            dataType: "json",
+            beforeSend:function(){
+                id_result.hide();
+                id_error.hide();
+                id_progress.html("Checking. Please Wait..").show();
+            },
+            success: function(msg) {
+                var resultobj = msg.result;
+                id_progress.hide();
+                if(resultobj) {
+                    id_result.html("Correct Spelling.").show();
+                }
+                else {
+                    id_result.html("Wrong Spelling").show();
+                    getSuggestions(word);
+                }
+            },
+            error: function(msg) {
+                id_progress.hide();
+                id_error.html("Something went wrong. Please try again!").show();
+            }
+        });
+    });
+    function getSuggestions(word)
+    {
+        var jsonRequest = {
+            module: "libindic.spellchecker",
+            method: "suggest",
+            params: [word],
+            id: ""
+        };
+        var id_list = $("#list");
+        $.ajax({
+            type: "POST",
+            contentType: "application/json; charset=utf-8",
+            url: "api",
+            data: JSON.stringify(jsonRequest),
+            dataType: "json",
+            beforeSend:function(){
+                id_result.hide();
+                id_error.hide();
+                id_list.empty();
+                id_progress.html("Fetching suggestions. Please wait...");
+            },
+            success: function(msg) {
+                var resultobj=eval(msg.result);
+                id_progress.hide();
+                id_result.html("Wrong Spelling. Suggestions:").show();
+                if(resultobj.length != 0)
+                {
+                    $.each(resultobj,function(index, item) {
+                        id_list.append($("<li>").text(item));
+                    });
+                }
+                else {
+                    id_list.append($("<li>").text("No suggestions available"));
+                }
+            },
+            error: function(msg) {
+                id_progress.hide();
+                id_errormessage.html("Something went wrong. Please try again!").show();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Spellchecker</h1>
+</div>
+<p>This is a demo of spellcheck service of silpa. In this page, you can enter a word for checking the spelling and just get the result.</p>
+<p>For using Silpa spellcheck service in your web or desktop applications, read the <a href="http://silpa.readthedocs.org/en/latest/apis.html">API documentation</a>. This page itself is an example for using silpa spellcheck APIs in a webpage.</p>
+
+<form class="form-horizontal" role="form">
+    <div class="form-group">
+        <label for="word" class="col-sm-2 control-label">Word</label>
+        <div class="col-sm-4">
+            <input type="text" name="word" id="word" class="form-control ime"/>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-default">Check Spelling</button>
+        </div>
+    </div>
+</form>
+
+<div id="progress" class="alert alert-info silpa-hide"></div>
+<div id="errormessage" class="alert alert-danger silpa-hide"></div>
+<div id="result"></div>
+<ul id='list'></ul>
+<hr/>
+<div class="well">
+    <h3>Python Spell Check and Spell Suggest  API</h3>
+    <ul>
+        <li>Method: modules.Spellchecker.check
+            <ul>
+                <li>arg1 : the word</li>
+                <li>arg2 : the language for the word(optional)</li>
+                <li>Return : True or False. True means the word is with correct spelling. Otherwise false.</li>
+            </ul>
+        </li>
+        <li>Method: modules.Spellchecker.suggest
+            <ul>
+                <li>arg1 : the word</li>
+                <li>arg2 : the language for the word(optional)</li>
+                <li>Return : List of string containing spelling suggestions</li>
+            </ul>
+        </li>
+    </ul>
+    <h3>Sample Usage</h3>
+    <pre class="code">
+    # -*- coding: utf-8 -*-
+    >>>from jsonrpc import ServiceProxy
+    >>>silpaService = ServiceProxy("http://smc.org.in/silpa/JSONRPC")
+    >>>print silpaService.spellchecker.check("speling")
+    False
+    >>>print silpaService.spellchecker.check("speling","en_US")
+    False
+    >>>print silpaService.spellchecker.suggest("speling")
+    ["spelling","spieling","spewing"]
+    </pre>
+</div>
+{% endblock %}
