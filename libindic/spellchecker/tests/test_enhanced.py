@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import collections
-
-from libindic.stemmer import Malayalam as stemmer
 from testtools import TestCase
 from io import open
 from pkg_resources import resource_filename

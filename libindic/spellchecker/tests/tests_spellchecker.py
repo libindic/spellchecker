@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import collections
-
-from libindic.stemmer import Malayalam as stemmer
+from libindic.stemmer.Malayalam import Malayalam as stemmer
 from testtools import TestCase
 
 from ..Malayalam import BaseMalayalam as spellchecker
@@ -54,24 +52,24 @@ class MalayalamSpellcheckerTest(TestCase):
         '''
         Test if correct word is in the list of suggestions generated.
         '''
-        words = collections.OrderedDict({u'ബാരതം': u'ഭാരതം',
-                                         u'അദ്യാപകന്‍': u'അധ്യാപകൻ',
-                                         u'ഹലാകലം': u'ഹലാഹലം',
-                                         u'ബാരതത്തിന്റെ': u'ഭാരതത്തിന്റെ',
-                                         u'അദ്യാപഗനോട്': u'അധ്യാപകനോട്',
-                                         u'ബർത്താവിനോട്': u'ഭർത്താവിനോട്',
-                                         u'ബാര്യയുടെ': u'ഭാര്യയുടെ',
-                                         u'ശോബയാൽ': u'ശോഭയാൽ',
-                                         u'ദേബിയോട്': u'ദേവിയോട്',
-                                         u'കേരലം': u'കേരളം',
-                                         u'ഗരുഢൻ': u'ഗരുഡൻ',
-                                         u'വിഞാനം': u'വിജ്ഞാനം',
-                                         u'അചൻ': u'അച്ഛൻ',
-                                         u'അചൻ': u'അച്ചൻ',
-                                         u'മൊതലാളിയോട്': u'മുതലാളിയോട്',
-
-                                         })
-        for incorrect_word, correct_word in words.items():
+        words = [
+            (u'ബാരതം', u'ഭാരതം'),
+            (u'അദ്യാപകന്‍', u'അധ്യാപകൻ'),
+            (u'ഹലാകലം', u'ഹലാഹലം'),
+            (u'ബാരതത്തിന്റെ', u'ഭാരതത്തിന്റെ'),
+            (u'അദ്യാപഗനോട്', u'അധ്യാപകനോട്'),
+            (u'ബർത്താവിനോട്', u'ഭർത്താവിനോട്'),
+            (u'ബാര്യയുടെ', u'ഭാര്യയുടെ'),
+            (u'ശോബയാൽ', u'ശോഭയാൽ'),
+            (u'ദേബിയോട്', u'ദേവിയോട്'),
+            (u'കേരലം', u'കേരളം'),
+            (u'ഗരുഢൻ', u'ഗരുഡൻ'),
+            (u'വിഞാനം', u'വിജ്ഞാനം'),
+            (u'അചൻ', u'അച്ഛൻ'),
+            (u'അചൻ', u'അച്ചൻ'),
+            (u'മൊതലാളിയോട്', u'മുതലാളിയോട്')
+        ]
+        for incorrect_word, correct_word in words:
             incorrect_word = self.stemmer.singleencode(incorrect_word)
             correct_word = self.stemmer.singleencode(correct_word)
             suggestion_list = self.spellchecker.suggest(incorrect_word)
