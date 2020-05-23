@@ -26,7 +26,7 @@ from operator import attrgetter
 import marisa_trie
 from libindic.syllabifier import Syllabifier
 from libindic.ngram import Ngram
-from libindic.stemmer import Malayalam as Stemmer
+from libindic.stemmer.Malayalam import Malayalam as Stemmer
 from libindic.stemmer import inflector
 from libindic.soundex import Soundex
 from sandhisplitter import Sandhisplitter
@@ -103,7 +103,7 @@ class BaseMalayalam:
         try:
             self.dictionary = marisa_trie.Trie([x.strip().decode('utf-8')
                                                 for x in self.dictionary])
-        except:
+        except (AttributeError, UnicodeEncodeError):
             self.dictionary = marisa_trie.Trie(
                 [x.strip() for x in self.dictionary])
         self.stemmer = Stemmer()
@@ -207,12 +207,8 @@ class BaseMalayalam:
         for item in sorted_list:
             word = item.word
             tag_list = item.tag_list
-            try:
-                inflected_form = self.inflector.inflect(word, tag_list)
-                final_list.append(inflected_form)
-            except:
-                final_list.append(word)
-                continue
+            inflected_form = self.inflector.inflect(word, tag_list)
+            final_list.append(inflected_form)
         return self.get_unique(final_list)
 
     def levenshtein_distance(self, tokens1, tokens2):

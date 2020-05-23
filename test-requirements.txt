@@ -1,6 +1,10 @@
-testrepository
-python-subunit
+# for code quality
 flake8
 mccabe
+
+# for coverage reporting
 coverage
 coveralls
+
+# for fixing failing tests one by one
+testrepository
