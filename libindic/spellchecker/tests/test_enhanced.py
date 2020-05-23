@@ -3,16 +3,17 @@
 
 from testtools import TestCase
 from io import open
-from pkg_resources import resource_filename
+import os.path
 
 from .. import Malayalam as spellchecker
+
 
 
 class MalayalamSpellcheckerTest(TestCase):
 
     def open_resource(self, filename):
-        fname = resource_filename("libindic.spellchecker.tests",
-                                  "resources/" + filename)
+        resource_path = os.path.abspath(os.path.dirname(__file__)) + "/resources"
+        fname = os.path.join(resource_path, filename)
         return open(fname, "r", encoding="utf-8")
 
     def setUp(self):
@@ -20,6 +21,10 @@ class MalayalamSpellcheckerTest(TestCase):
         self.spellchecker = spellchecker()
         self.true_cases = self.open_resource("true.txt")
         self.false_cases = self.open_resource("false.txt")
+
+    def tearDown(self):
+        self.true_cases.close()
+        self.false_cases.close()
 
     def test_check(self):
         for line in self.true_cases:
