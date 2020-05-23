@@ -22,10 +22,6 @@ class MalayalamSpellcheckerTest(TestCase):
         self.true_cases = self.open_resource("true.txt")
         self.false_cases = self.open_resource("false.txt")
 
-    def tearDown(self):
-        self.true_cases.close()
-        self.false_cases.close()
-
     def test_check(self):
         for line in self.true_cases:
             word = line.strip()
