@@ -8,11 +8,11 @@ import os.path
 from .. import Malayalam as spellchecker
 
 
-
 class MalayalamSpellcheckerTest(TestCase):
 
     def open_resource(self, filename):
-        resource_path = os.path.abspath(os.path.dirname(__file__)) + "/resources"
+        resource_path = os.path.abspath(
+            os.path.dirname(__file__)) + "/resources"
         fname = os.path.join(resource_path, filename)
         return open(fname, "r", encoding="utf-8")
 
